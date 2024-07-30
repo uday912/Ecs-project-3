@@ -1,21 +1,13 @@
-# this is my base image
-FROM alpine:3.12
+FROM ubuntu:20.04
 
-# Install python and pip
-RUN apk add --update ca-certificates && \
-    apk add --update python3 && \
-    apk add --update py3-pip
+ENV DEBIAN_FRONTEND=noninteractive
 
-# install Python modules needed by the Python app
-COPY requirements.txt /usr/src/app/
-RUN pip3 install --no-cache-dir -r /usr/src/app/requirements.txt
+RUN apt-get update && \
+    apt-get install -y apache2 && \
+    apt-get clean
 
-# copy files required for the app to run
-COPY app.py /usr/src/app/
-COPY templates/index.html /usr/src/app/templates/
+COPY index.html /var/www/html
 
-# tell the port number the container should expose
-EXPOSE 5000
+EXPOSE 80
 
-# run the application
-CMD ["python3", "/usr/src/app/app.py"]
+CMD ["apachectl", "-D", "FOREGROUND"]
