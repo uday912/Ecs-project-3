@@ -1,28 +1,48 @@
+<!DOCTYPE html>
 <html>
   <head>
-    <style type="text/css">
+    <title>Application Deployment to Amazon ECS</title>
+    <style>
       body {
-        background: black;
-        color: yellow;
+        background-color: seaGreen;
+        margin: 0;
+        padding: 0;
       }
-      div.container {
-        max-width: 500px;
-        margin: 100px auto;
-        border: 20px solid white;
-        padding: 10px;
-        text-align: center;
+      .navbar {
+        background-color: white;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        height: 50px;
+        padding: 0 20px;
       }
-      h4 {
-        text-transform: uppercase;
+      .navbar button {
+        border: none;
+        background-color: white;
+        color: orange;
+        font-size: 16px;
+        font-weight: bold;
+        cursor: pointer;
+        outline: none;
+        padding: 10px 20px;
+        margin-right: 10px;
+        border-radius: 20px;
+        transition: all 0.3s ease;
+      }
+      .navbar button:hover {
+        background-color: seaGreen;
+        color: white;
       }
     </style>
   </head>
   <body>
-    <div class="container">
-      <h4>ECS-ECR-PROJECT BY UDAYl</h4>
-      <h4>PROJECT COMPLETED SUCCESSFULLY</h4>
-      <br>
-       <h4>ECS</h4>
+    <div class="navbar">
+      <button>Home</button>
+      <button>Services</button>
+      <button>About Us</button>
+      <button>DevOps Courses</button>
     </div>
+    <h1>WEB APPLICATION DEPLOYMENT TO ECS TUTORIAL BY UDAY</h1>
+    <p>Learning Containerization with Docker and Deployment to Amazon ECS</p>
   </body>
 </html>
