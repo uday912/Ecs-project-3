@@ -1,7 +1,7 @@
 pipeline {
     agent any
      environment {
-        registry = "654654178716.dkr.ecr.us-east-1.amazonaws.com/ecr-jenkins-repo"
+        registry = "654654178716.dkr.ecr.us-east-1.amazonaws.com/ecs-jenkins"
     }
    
     stages {
@@ -23,7 +23,7 @@ pipeline {
                   script {
                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws_cred', accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY']]) {
     sh 'aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 654654178716.dkr.ecr.us-east-1.amazonaws.com'
-     sh 'docker push 654654178716.dkr.ecr.us-east-1.amazonaws.com/ecr-jenkins-repo'
+     sh 'docker push 654654178716.dkr.ecr.us-east-1.amazonaws.com/ecs-jenkins'
 }
 
 }
@@ -31,14 +31,14 @@ pipeline {
             }
              stage('stop previous containers') {
                steps {
-            sh 'docker ps -f name=mypythonContainer -q | xargs --no-run-if-empty docker container stop'
-            sh 'docker container ls -a -fname=mypythonContainer -q | xargs -r docker container rm'
+            sh 'docker ps -f name=myContainer -q | xargs --no-run-if-empty docker container stop'
+            sh 'docker container ls -a -fname=myContainer -q | xargs -r docker container rm'
          }
        }
             stage('Docker Run') {
               steps{
                    script {
-                sh 'docker run -d -p 8096:5000 --rm --name mypythonContainer 654654178716.dkr.ecr.us-east-1.amazonaws.com/ecr-jenkins-repo:latest'     
+                sh 'docker run -d -p 80:80 --rm --name myContainer 654654178716.dkr.ecr.us-east-1.amazonaws.com/ecs-jenkins:latest'     
       }
     }
         }
