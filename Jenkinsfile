@@ -69,7 +69,8 @@ pipeline {
                             "portMappings": [{
                                 "containerPort": 80,
                                 "hostPort": 80
-                            }]
+                            }],
+                            "memory": 512
                         }]' \
                         --region ${region}
                     """
