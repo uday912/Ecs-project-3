@@ -6,9 +6,10 @@ pipeline {
         clusterName = "ecs-jenkins-cluster" // Your ECS cluster name
         serviceName = "ecs-jenkins-service-new" // Your ECS service name
         containerName = "ecs-jenkins-container" // Your container name in the ECS task definition
-        taskFamily = "ecs-jenkins-task-family" // Your ECS task family name
+        taskFamily = "ecs-jenkins-task-family1" // Your ECS task family name
         cpu = "256" // Fargate CPU units
         memory = "512" // Fargate memory in MiB
+        executionRoleArn = "arn:aws:iam::654654178716:role/ecsTaskExecutionRole" // Your execution role ARN
     }
 
     stages {
@@ -63,6 +64,7 @@ pipeline {
                         --network-mode awsvpc \
                         --cpu ${cpu} \
                         --memory ${memory} \
+                        --execution-role-arn ${executionRoleArn} \
                         --container-definitions '[{
                             "name": "${containerName}",
                             "image": "${registry}:latest",
