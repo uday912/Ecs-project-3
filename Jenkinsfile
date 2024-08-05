@@ -69,27 +69,33 @@ pipeline {
                             "portMappings": [{
                                 "containerPort": 80,
                                 "hostPort": 80
+                        --requires-compatibilities FARGATE \  
+                        --network-mode awsvpc \
                             }],
-                            "memory": 512
+                            "memory": 512,
+                             "cpu": 256
                         }]' \
                         --region ${region}
                     """
                 }
             }
         }
-
-        stage('Deploy to ECS') {
-            steps {
-                script {
-                    // Get the new task definition revision
-                    def newTaskDefArn = sh(
-                        script: "aws ecs describe-task-definition --task-definition ecs-jenkins-task-family --region ${region} | jq -r '.taskDefinition.taskDefinitionArn'",
-                        returnStdout: true
-                    ).trim()
-
-                    // Update ECS service to use the new task definition
-                    sh "aws ecs update-service --cluster ${clusterName} --service ${serviceName} --task-definition ${newTaskDefArn} --region ${region}"
-                }
+        
+      stage('Deploy to ECS') {
+          steps {
+              script {
+                  def taskDefinitionArn = sh(
+                      script: "aws ecs describe-task-definition --task-definition ecs-jenkins-task-family --region us-east-1 | jq -r .taskDefinition.taskDefinitionArn",
+                      returnStdout: true
+                  ).trim()
+            
+                  sh """
+                  aws ecs update-service \
+                      --cluster ecs-jenkins-cluster \
+                      --service ecs-jenkins-service-new \
+                      --task-definition $taskDefinitionArn \
+                      --region us-east-1
+                  """
             }
         }
     }
