@@ -6,6 +6,9 @@ pipeline {
         clusterName = "ecs-jenkins-cluster" // Your ECS cluster name
         serviceName = "ecs-jenkins-service-new" // Your ECS service name
         containerName = "ecs-jenkins-container" // Your container name in the ECS task definition
+        taskFamily = "ecs-jenkins-task-family" // Your ECS task family name
+        cpu = "256" // Fargate CPU units
+        memory = "512" // Fargate memory in MiB
     }
 
     stages {
@@ -52,18 +55,14 @@ pipeline {
         stage('Update ECS Task Definition') {
             steps {
                 script {
-                    // Fetch the current task definition
-                    def taskDefArn = sh(
-                        script: "aws ecs describe-services --cluster ${clusterName} --services ${serviceName} --region ${region} | jq -r '.services[0].taskDefinition'",
-                        returnStdout: true
-                    ).trim()
-
-                    // Create a new revision of the task definition with the updated image
+                    // Register a new task definition revision for Fargate
                     sh """
                     aws ecs register-task-definition \
-                        --family ecs-jenkins-task-family \
-                        --requires-compatibilities FARGATE \  
+                        --family ${taskFamily} \
+                        --requires-compatibilities FARGATE \
                         --network-mode awsvpc \
+                        --cpu ${cpu} \
+                        --memory ${memory} \
                         --container-definitions '[{
                             "name": "${containerName}",
                             "image": "${registry}:latest",
@@ -72,30 +71,26 @@ pipeline {
                                 "containerPort": 80,
                                 "hostPort": 80
                             }],
-                            "memory": 512,
-                             "cpu": 256
+                            "memory": 512
                         }]' \
                         --region ${region}
                     """
                 }
             }
         }
-        
-      stage('Deploy to ECS') {
-          steps {
-              script {
-                  def taskDefinitionArn = sh(
-                      script: "aws ecs describe-task-definition --task-definition ecs-jenkins-task-family --region us-east-1 | jq -r .taskDefinition.taskDefinitionArn",
-                      returnStdout: true
-                  ).trim()
-            
-                  sh """
-                  aws ecs update-service \
-                      --cluster ecs-jenkins-cluster \
-                      --service ecs-jenkins-service-new \
-                      --task-definition $taskDefinitionArn \
-                      --region us-east-1
-                  """
+
+        stage('Deploy to ECS') {
+            steps {
+                script {
+                    // Get the new task definition revision
+                    def newTaskDefArn = sh(
+                        script: "aws ecs describe-task-definition --task-definition ${taskFamily} --region ${region} | jq -r '.taskDefinition.taskDefinitionArn'",
+                        returnStdout: true
+                    ).trim()
+
+                    // Update ECS service to use the new task definition
+                    sh "aws ecs update-service --cluster ${clusterName} --service ${serviceName} --task-definition ${newTaskDefArn} --region ${region}"
+                }
             }
         }
     }
