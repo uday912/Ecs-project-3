@@ -62,6 +62,8 @@ pipeline {
                     sh """
                     aws ecs register-task-definition \
                         --family ecs-jenkins-task-family \
+                        --requires-compatibilities FARGATE \  
+                        --network-mode awsvpc \
                         --container-definitions '[{
                             "name": "${containerName}",
                             "image": "${registry}:latest",
@@ -69,8 +71,6 @@ pipeline {
                             "portMappings": [{
                                 "containerPort": 80,
                                 "hostPort": 80
-                        --requires-compatibilities FARGATE \  
-                        --network-mode awsvpc \
                             }],
                             "memory": 512,
                              "cpu": 256
