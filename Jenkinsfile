@@ -3,9 +3,9 @@ pipeline {
     environment {
         registry = "654654178716.dkr.ecr.us-east-1.amazonaws.com/ecs-jenkins"
         region = "us-east-1"
-        clusterName = "ecs-jenkins-cluster" 
-        serviceName = "ecs-jenkins-service-new" 
-        containerName = "ecs-jenkins-container" 
+        clusterName = "ecs-jenkins-cluster" // Your ECS cluster name
+        serviceName = "ecs-jenkins-service-new" // Your ECS service name
+        containerName = "ecs-jenkins-container" // Your container name in the ECS task definition
     }
 
     stages {
@@ -61,20 +61,16 @@ pipeline {
                     // Create a new revision of the task definition with the updated image
                     sh """
                     aws ecs register-task-definition \
-                        --family ${taskDefArn.split('/')[1]} \
-                        --container-definitions '[
-                            {
-                                "name": "${containerName}",
-                                "image": "${registry}:latest",
-                                "essential": true,
-                                "portMappings": [
-                                    {
-                                        "containerPort": 80,
-                                        "hostPort": 80
-                                    }
-                                ]
-                            }
-                        ]' \
+                        --family ecs-jenkins-task-family \
+                        --container-definitions '[{
+                            "name": "${containerName}",
+                            "image": "${registry}:latest",
+                            "essential": true,
+                            "portMappings": [{
+                                "containerPort": 80,
+                                "hostPort": 80
+                            }]
+                        }]' \
                         --region ${region}
                     """
                 }
@@ -86,7 +82,7 @@ pipeline {
                 script {
                     // Get the new task definition revision
                     def newTaskDefArn = sh(
-                        script: "aws ecs describe-task-definition --task-definition ${containerName} --region ${region} | jq -r '.taskDefinition.taskDefinitionArn'",
+                        script: "aws ecs describe-task-definition --task-definition ecs-jenkins-task-family --region ${region} | jq -r '.taskDefinition.taskDefinitionArn'",
                         returnStdout: true
                     ).trim()
 
